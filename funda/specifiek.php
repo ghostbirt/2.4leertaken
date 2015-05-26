@@ -5,7 +5,7 @@
  <fieldset>
    Soort woning: 
    <input type="radio" name="woning" value="bestaand" id="bestaand"/><label for="bestaand">Bestaande bouw</label>
-   <input type="radio" name="woning" value="nieuwbouw" id="nieuwbouw"/><label for="nieuwbouw">Bestaande bouw</label>
+   <input type="radio" name="woning" value="nieuwbouw" id="nieuwbouw"/><label for="nieuwbouw">Nieuwbouw</label>
    <br/>
 
    Vul (een deel van) het adres in dat u zoekt.<br/>

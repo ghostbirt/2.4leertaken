@@ -69,6 +69,17 @@
       </div>
     </td>
     
+    <?php 
+    
+    	$sort = $_POST["woning"];
+		$street = $_POST["straatnaam"] . " " . $_POST["huisnummer"] . $_POST["toevoeging"];
+		$postal = $_POST["postcode"];
+		$city = $_POST["plaatsnaam"];
+		echo $sort . " " . $street . " " . $postal . " " . $city;
+    
+    
+    
+    ?>
 
     <td valign="top">
       <div class="huisdata">
