@@ -1,3 +1,37 @@
+<?php 
+    	$db = new PDO('mysql:host=localhost;dbname=funda;charset=utf8', 'root', 'root');
+		$selectStatement = "SELECT wo.Address, wo.PC, wo.City, Vraagprijs, soortvraagprijs.Name AS prijstype, mkantoor.Name AS makelaar,  WoonOppervlakte, AantalKamers, soortbouw.Name
+							FROM wo, mkantoor, soortvraagprijs, soortbouw
+							WHERE 1
+							AND wo.MKID = mkantoor.MKID
+							AND wo.vraagprijssoort = soortvraagprijs.id
+							AND wo.soortbouw = soortbouw.id
+							AND soortbouw.Name LIKE ?
+							AND wo.Address LIKE ?
+							AND wo.City LIKE ?
+							AND wo.PC LIKE ?";
+							
+		$stmt = $db->prepare($selectStatement);
+		
+		$type = "";
+		$street = "";
+		$city = "";
+		$postal = "";
+		
+		if(isset($_POST["woning"])) $type = $_POST["woning"];
+		if(isset($_POST["straatnaam"])) $street = $street . $_POST["straatnaam"];
+		if(isset($_POST["huisnummer"])) $street = $street . " " . $_POST["huisnummer"];	
+		if(isset($_POST["toevoeging"]) && isset($_POST["huisnummer"])) $street = $street . $_POST["toevoeging"];
+		if(isset($_POST["plaatsnaam"])) $city = $_POST["plaatsnaam"];
+		if(isset($_POST["postcode"])) $postal = $_POST["postcode"];
+
+		$stmt->bindValue(1, "%". $type . "%", PDO::PARAM_STR);
+		$stmt->bindValue(2, "%". $street . "%", PDO::PARAM_STR);
+		$stmt->bindValue(3, "%". $city . "%", PDO::PARAM_STR);
+		$stmt->bindValue(4, "%". $postal . "%", PDO::PARAM_STR);
+				
+		$stmt->execute();
+ 		?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"><head> 
@@ -35,7 +69,7 @@
 </div>
 
 <div id="txt">
-  1.123 koopwoningen gevonden
+  <?php echo $stmt->rowCount(); ?> koopwoningen gevonden
 </div>
 
 <div id="main">
@@ -70,40 +104,7 @@
     </td>
 
     <td valign="top">
-    	<?php 
-    	$db = new PDO('mysql:host=localhost;dbname=funda;charset=utf8', 'root', 'root');
-		$selectStatement = "SELECT wo.Address, wo.PC, wo.City, Vraagprijs, soortvraagprijs.Name AS prijstype, mkantoor.Name AS makelaar,  WoonOppervlakte, AantalKamers, soortbouw.Name
-							FROM wo, mkantoor, soortvraagprijs, soortbouw
-							WHERE 1
-							AND wo.MKID = mkantoor.MKID
-							AND wo.vraagprijssoort = soortvraagprijs.id
-							AND wo.soortbouw = soortbouw.id
-							AND soortbouw.Name LIKE ?
-							AND wo.Address LIKE ?
-							AND wo.City LIKE ?
-							AND wo.PC LIKE ?";
-							
-		$stmt = $db->prepare($selectStatement);
-		
-		$type = "";
-		$street = "";
-		$city = "";
-		$postal = "";
-		
-		if(isset($_POST["woning"])) $type = $_POST["woning"];
-		if(isset($_POST["straatnaam"])) $street = $street . $_POST["straatnaam"];
-		if(isset($_POST["huisnummer"])) $street = $street . " " . $_POST["huisnummer"];	
-		if(isset($_POST["toevoeging"]) && isset($_POST["huisnummer"])) $street = $street . $_POST["toevoeging"];
-		if(isset($_POST["plaatsnaam"])) $city = $_POST["plaatsnaam"];
-		if(isset($_POST["postcode"])) $postal = $_POST["postcode"];
-
-		$stmt->bindValue(1, "%". $type . "%", PDO::PARAM_STR);
-		$stmt->bindValue(2, "%". $street . "%", PDO::PARAM_STR);
-		$stmt->bindValue(3, "%". $city . "%", PDO::PARAM_STR);
-		$stmt->bindValue(4, "%". $postal . "%", PDO::PARAM_STR);
-				
-		$stmt->execute();
- 
+ 		<?php
 		while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     		echo "<div class=\"huisdata\">";
     		echo    "<div class=\"head\"><a class=\"normal\" href=\"detail.html\">". $row["Address"] . "</a></div><div class=\"prijs\">€ ". number_format($row["Vraagprijs"], 0 , ",", ".") . " ". $row["prijstype"] . "</div><br/>";
@@ -111,7 +112,6 @@
 		    echo    "<span><a class=\"makelaar\" href=\"makelaar.html\">". $row["makelaar"] . "</a></span>";
       		echo "</div>";
 		}
-   
     ?>
     </td>
   </tr>
