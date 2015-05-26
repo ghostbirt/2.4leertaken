@@ -78,25 +78,26 @@
 							AND wo.MKID = mkantoor.MKID
 							AND wo.vraagprijssoort = soortvraagprijs.id
 							AND wo.soortbouw = soortbouw.id
-							AND soortbouw.Name = ?
+							AND soortbouw.Name LIKE ?
 							AND wo.Address LIKE ?
 							AND wo.City LIKE ?
 							AND wo.PC LIKE ?";
 							
 		$stmt = $db->prepare($selectStatement);
 		
-		$type = $_POST["woning"];
+		$type = "";
 		$street = "";
 		$city = "";
 		$postal = "";
 		
+		if(isset($_POST["woning"])) $type = $_POST["woning"];
 		if(isset($_POST["straatnaam"])) $street = $street . $_POST["straatnaam"];
 		if(isset($_POST["huisnummer"])) $street = $street . " " . $_POST["huisnummer"];	
 		if(isset($_POST["toevoeging"]) && isset($_POST["huisnummer"])) $street = $street . $_POST["toevoeging"];
 		if(isset($_POST["plaatsnaam"])) $city = $_POST["plaatsnaam"];
 		if(isset($_POST["postcode"])) $postal = $_POST["postcode"];
-		
-		$stmt->bindValue(1, $type, PDO::PARAM_STR);
+
+		$stmt->bindValue(1, "%". $type . "%", PDO::PARAM_STR);
 		$stmt->bindValue(2, "%". $street . "%", PDO::PARAM_STR);
 		$stmt->bindValue(3, "%". $city . "%", PDO::PARAM_STR);
 		$stmt->bindValue(4, "%". $postal . "%", PDO::PARAM_STR);
@@ -112,29 +113,6 @@
 		}
    
     ?>
-      <div class="huisdata">
-        <div class="head"><a class="normal" href="detail.html">Bekemaheerd 22</a></div><div class="prijs">€ 135.000 k.k.</div><br/>
-        <span class="adres">9737 PT Groningen<br/>75 m<sup>2</sup> - 3 kamers</span><br/>
-        <span><a class="makelaar" href="makelaar.html">Hypodomus Groningen</a></span>
-      </div>
-
-      <div class="huisdata">
-        <div class="head"><a class="normal" href="detail.html">Bekemaheerd 22</a></div><div class="prijs">€ 135.000 k.k.</div><br/>
-        <span class="adres">9737 PT Groningen<br/>75 m<sup>2</sup> - 3 kamers</span><br/>
-        <span><a class="makelaar" href="makelaar.html">Hypodomus Groningen</a></span>
-      </div>
-
-      <div class="huisdata">
-        <div class="head"><a class="normal" href="detail.html">Bekemaheerd 22</a></div><div class="prijs">€ 135.000 k.k.</div><br/>
-        <span class="adres">9737 PT Groningen<br/>75 m<sup>2</sup> - 3 kamers</span><br/>
-        <span><a class="makelaar" href="makelaar.html">Hypodomus Groningen</a></span>
-      </div>
-
-      <div class="huisdata">
-        <div class="head"><a class="normal" href="detail.html">Bekemaheerd 22</a></div><div class="prijs">€ 135.000 k.k.</div><br/>
-        <span class="adres">9737 PT Groningen<br/>75 m<sup>2</sup> - 3 kamers</span><br/>
-        <span><a class="makelaar" href="makelaar.html">Hypodomus Groningen</a></span>
-      </div>
     </td>
   </tr>
 </table>
