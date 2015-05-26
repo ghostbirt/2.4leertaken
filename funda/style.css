@@ -93,6 +93,11 @@ div.huisdata span.adres {
   color: dimgray;
 }
 
+div.pages {
+    padding: 0px;
+    DISPLAY:inline;
+}
+
 
 a.makelaar {
   color: green;

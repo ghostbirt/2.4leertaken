@@ -1,18 +1,5 @@
 <?php 
-    	$db = new PDO('mysql:host=localhost;dbname=funda;charset=utf8', 'root', 'root');
-		$selectStatement = "SELECT wo.Address, wo.PC, wo.City, Vraagprijs, soortvraagprijs.Name AS prijstype, mkantoor.Name AS makelaar,  WoonOppervlakte, AantalKamers, soortbouw.Name
-							FROM wo, mkantoor, soortvraagprijs, soortbouw
-							WHERE 1
-							AND wo.MKID = mkantoor.MKID
-							AND wo.vraagprijssoort = soortvraagprijs.id
-							AND wo.soortbouw = soortbouw.id
-							AND soortbouw.Name LIKE ?
-							AND wo.Address LIKE ?
-							AND wo.City LIKE ?
-							AND wo.PC LIKE ?";
-							
-		$stmt = $db->prepare($selectStatement);
-		
+
 		$type = "";
 		$street = "";
 		$city = "";
@@ -24,13 +11,53 @@
 		if(isset($_POST["toevoeging"]) && isset($_POST["huisnummer"])) $street = $street . $_POST["toevoeging"];
 		if(isset($_POST["plaatsnaam"])) $city = $_POST["plaatsnaam"];
 		if(isset($_POST["postcode"])) $postal = $_POST["postcode"];
-
-		$stmt->bindValue(1, "%". $type . "%", PDO::PARAM_STR);
-		$stmt->bindValue(2, "%". $street . "%", PDO::PARAM_STR);
-		$stmt->bindValue(3, "%". $city . "%", PDO::PARAM_STR);
-		$stmt->bindValue(4, "%". $postal . "%", PDO::PARAM_STR);
-				
-		$stmt->execute();
+		if(isset($_POST["street"])) $street = $_POST["street"];
+		
+    	$db = new PDO('mysql:host=localhost;dbname=funda;charset=utf8', 'root', 'root');
+		if(!isset($_POST["count"])){
+			$selectStatement = "SELECT wo.Address, wo.PC, wo.City, Vraagprijs, soortvraagprijs.Name AS prijstype, mkantoor.Name AS makelaar,  WoonOppervlakte, AantalKamers, soortbouw.Name
+							FROM wo, mkantoor, soortvraagprijs, soortbouw
+							WHERE 1
+							AND wo.MKID = mkantoor.MKID
+							AND wo.vraagprijssoort = soortvraagprijs.id
+							AND wo.soortbouw = soortbouw.id
+							AND soortbouw.Name LIKE ?
+							AND wo.Address LIKE ?
+							AND wo.City LIKE ?
+							AND wo.PC LIKE ?";
+							
+			$stmt = $db->prepare($selectStatement);
+	
+			$stmt->bindValue(1, "%". $type . "%", PDO::PARAM_STR);
+			$stmt->bindValue(2, "%". $street . "%", PDO::PARAM_STR);
+			$stmt->bindValue(3, "%". $city . "%", PDO::PARAM_STR);
+			$stmt->bindValue(4, "%". $postal . "%", PDO::PARAM_STR);
+					
+			$stmt->execute();
+			$_POST["count"] = $stmt->rowCount();
+			$_POST["page"] = 1;
+		}
+		
+		$selectStatement = "SELECT wo.Address, wo.PC, wo.City, Vraagprijs, soortvraagprijs.Name AS prijstype, mkantoor.Name AS makelaar,  WoonOppervlakte, AantalKamers, soortbouw.Name
+							FROM wo, mkantoor, soortvraagprijs, soortbouw
+							WHERE 1
+							AND wo.MKID = mkantoor.MKID
+							AND wo.vraagprijssoort = soortvraagprijs.id
+							AND wo.soortbouw = soortbouw.id
+							AND soortbouw.Name LIKE ?
+							AND wo.Address LIKE ?
+							AND wo.City LIKE ?
+							AND wo.PC LIKE ?
+							LIMIT ?, 15 ";
+							
+			$stmt = $db->prepare($selectStatement);
+	
+			$stmt->bindValue(1, "%". $type . "%", PDO::PARAM_STR);
+			$stmt->bindValue(2, "%". $street . "%", PDO::PARAM_STR);
+			$stmt->bindValue(3, "%". $city . "%", PDO::PARAM_STR);
+			$stmt->bindValue(4, "%". $postal . "%", PDO::PARAM_STR);
+			$stmt->bindValue(5, (($_POST["page"]-1) * 15), PDO::PARAM_INT);
+			$stmt->execute();
  		?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
@@ -69,7 +96,7 @@
 </div>
 
 <div id="txt">
-  <?php echo $stmt->rowCount(); ?> koopwoningen gevonden
+  <?php echo $_POST["count"]; ?> koopwoningen gevonden
 </div>
 
 <div id="main">
@@ -116,6 +143,88 @@
     </td>
   </tr>
 </table>
+
+<?php
+	$pages = ceil($_POST["count"]/15);
+	$start = 1;
+	$end = $pages;
+	if($_POST["page"] == 1){
+		$start = 2;
+		$end = 5;
+	} else if($_POST["page"] < 5){
+		$start = 2;
+		$end = $_POST["page"] + 2;
+	} else if($_POST["page"] > $pages - 4){
+		$start = $pages - 6;
+		$end = $pages-1;
+	} else {
+		$start = $_POST["page"] - 2;
+		$end = $_POST["page"] + 2;
+	}
+	
+	$displayNumber;
+	if($_POST["page"] == 1){
+		$displayNumber = "1\" style=\"font-weight:bold";
+	} else {
+		$displayNumber = "1";
+	}
+	
+	echo "<table style=\"width:150%\">";
+  	echo "<tr>";
+	echo 	"<td>";
+	echo 		"<form method=\"post\">";
+	echo 			"<input type=\"hidden\" name=\"street\" value=\"" . $street . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"woning\" value=\"" . $type . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"plaatsnaam\" value=\"" . $city . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"postcode\" value=\"" . $postal . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"count\" value=\"" . $_POST["count"] . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"page\" value=\"1\"/>";
+	echo 			"<input type=\"submit\" value=\"". $displayNumber . "\"/>";
+	echo 		"</form>";
+	echo 	"</td>";
+	
+	if($start > 2) echo "<td> . . . </td>";
+	
+	for( ; $start <= $end; $start++){
+		if($_POST["page"] == $start){
+			$displayNumber = $start . "\" style=\"font-weight:bold";
+		}  else {
+			$displayNumber = $start;
+		}
+		echo "<td>";
+		echo 	"<form method=\"post\">";
+		echo 		"<input type=\"hidden\" name=\"street\" value=\"" . $street . "\"/>";
+		echo 		"<input type=\"hidden\" name=\"woning\" value=\"" . $type . "\"/>";
+		echo 		"<input type=\"hidden\" name=\"plaatsnaam\" value=\"" . $city . "\"/>";
+		echo 		"<input type=\"hidden\" name=\"postcode\" value=\"" . $postal . "\"/>";
+		echo 		"<input type=\"hidden\" name=\"count\" value=\"" . $_POST["count"] . "\"/>";
+		echo 		"<input type=\"hidden\" name=\"page\" value=\"". $start . "\"/>";
+		echo 		"<input type=\"submit\" value=\"". $displayNumber . "\"/>";
+		echo 	"</form>";
+		echo "</td>";
+	}
+	
+	if($end < $pages - 1) echo "<td> . . . </td>";
+	
+	if($_POST["page"] == $pages){
+		$displayNumber = $pages . "\" style=\"font-weight:bold";
+	} else {
+		$displayNumber = $pages;
+	}
+	echo 	"<td>";
+	echo 		"<form method=\"post\">";
+	echo 			"<input type=\"hidden\" name=\"street\" value=\"" . $street . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"woning\" value=\"" . $type . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"plaatsnaam\" value=\"" . $city . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"postcode\" value=\"" . $postal . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"count\" value=\"" . $_POST["count"] . "\"/>";
+	echo 			"<input type=\"hidden\" name=\"page\" value=\"". $pages ."\"/>";
+	echo 			"<input type=\"submit\" value=\"". $displayNumber . "\"/>";
+	echo 		"</form>";
+	echo 	"</td>";
+	echo "</tr>";
+	echo "</table>";
+?>
 
 </div>
 
