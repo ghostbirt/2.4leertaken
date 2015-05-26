@@ -1,10 +1,10 @@
 <? require 'header.php'; ?>
 
-<div id="specifiek" action= "overzicht.php" style="width: 300px; margin-left: 30px;">
-<form method="post">
+<div id="specifiek" style="width: 300px; margin-left: 30px;">
+<form action= "overzicht.php" method="post">
  <fieldset>
    Soort woning: 
-   <input type="radio" name="woning" value="bestaand" id="bestaand"/><label for="bestaand">Bestaande bouw</label>
+   <input type="radio" name="woning" value="bestaand" id="bestaand"/ selected="selected"><label for="bestaand">Bestaande bouw</label>
    <input type="radio" name="woning" value="nieuwbouw" id="nieuwbouw"/><label for="nieuwbouw">Nieuwbouw</label>
    <br/>
 

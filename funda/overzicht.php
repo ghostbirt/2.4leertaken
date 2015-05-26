@@ -68,20 +68,50 @@
         <!-- DATA WEERGEVEN -->
       </div>
     </td>
-    
-    <?php 
-    
-    	$sort = $_POST["woning"];
-		$street = $_POST["straatnaam"] . " " . $_POST["huisnummer"] . $_POST["toevoeging"];
-		$postal = $_POST["postcode"];
-		$city = $_POST["plaatsnaam"];
-		echo $sort . " " . $street . " " . $postal . " " . $city;
-    
-    
-    
-    ?>
 
     <td valign="top">
+    	<?php 
+    	$db = new PDO('mysql:host=localhost;dbname=funda;charset=utf8', 'root', 'root');
+		$selectStatement = "SELECT wo.Address, wo.PC, wo.City, Vraagprijs, soortvraagprijs.Name AS prijstype, mkantoor.Name AS makelaar,  WoonOppervlakte, AantalKamers, soortbouw.Name
+							FROM wo, mkantoor, soortvraagprijs, soortbouw
+							WHERE 1
+							AND wo.MKID = mkantoor.MKID
+							AND wo.vraagprijssoort = soortvraagprijs.id
+							AND wo.soortbouw = soortbouw.id
+							AND soortbouw.Name = ?
+							AND wo.Address LIKE ?
+							AND wo.City LIKE ?
+							AND wo.PC LIKE ?";
+							
+		$stmt = $db->prepare($selectStatement);
+		
+		$type = $_POST["woning"];
+		$street = "";
+		$city = "";
+		$postal = "";
+		
+		if(isset($_POST["straatnaam"])) $street = $street . $_POST["straatnaam"];
+		if(isset($_POST["huisnummer"])) $street = $street . " " . $_POST["huisnummer"];	
+		if(isset($_POST["toevoeging"]) && isset($_POST["huisnummer"])) $street = $street . $_POST["toevoeging"];
+		if(isset($_POST["plaatsnaam"])) $city = $_POST["plaatsnaam"];
+		if(isset($_POST["postcode"])) $postal = $_POST["postcode"];
+		
+		$stmt->bindValue(1, $type, PDO::PARAM_STR);
+		$stmt->bindValue(2, "%". $street . "%", PDO::PARAM_STR);
+		$stmt->bindValue(3, "%". $city . "%", PDO::PARAM_STR);
+		$stmt->bindValue(4, "%". $postal . "%", PDO::PARAM_STR);
+				
+		$stmt->execute();
+ 
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    		echo "<div class=\"huisdata\">";
+    		echo    "<div class=\"head\"><a class=\"normal\" href=\"detail.html\">". $row["Address"] . "</a></div><div class=\"prijs\">€ ". number_format($row["Vraagprijs"], 0 , ",", ".") . " ". $row["prijstype"] . "</div><br/>";
+		    echo    "<span class=\"adres\">". $row["PC"] . " " . $row["City"] . "<br/>". $row["WoonOppervlakte"] . " m<sup>2</sup> - ". $row["AantalKamers"] . " kamers</span><br/>";
+		    echo    "<span><a class=\"makelaar\" href=\"makelaar.html\">". $row["makelaar"] . "</a></span>";
+      		echo "</div>";
+		}
+   
+    ?>
       <div class="huisdata">
         <div class="head"><a class="normal" href="detail.html">Bekemaheerd 22</a></div><div class="prijs">€ 135.000 k.k.</div><br/>
         <span class="adres">9737 PT Groningen<br/>75 m<sup>2</sup> - 3 kamers</span><br/>
