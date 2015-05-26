@@ -1,6 +1,6 @@
 <? require 'header.php'; ?>
 
-<div id="specifiek" style="width: 300px; margin-left: 30px;">
+<div id="specifiek" action= "overzicht.php" style="width: 300px; margin-left: 30px;">
 <form method="post">
  <fieldset>
    Soort woning: 
